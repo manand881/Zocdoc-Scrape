@@ -29,7 +29,7 @@ def DownloadHTMLPage(WorkingURL,FileName):
         f.close()
         writedocprofiletotxt(HTMLFileName,BaseURL[:-1])
         removeduplicates()
-        time.sleep(2)
+        time.sleep(1.5)
 
 BaseURL="https://www.zocdoc.com/"
 CategorySuffix="primary-care-doctors/"

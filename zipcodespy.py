@@ -2,18 +2,14 @@ import zipcodes
 import os
 
 ziplist=list()
-f=open("USZipCodes","w+") 
-f.writelines("hello")
+FileName=open("Zipcodes.txt","w+") 
 
-def NumberGenerator():
-    for ZipCode in range(1500):
-        yield str(ZipCode).zfill(5)
-        ZipCode += 1
-
-for x in NumberGenerator():
-    if(zipcodes.is_real(x)):
-        ziplist.append(x)
-        f.writelines(x)
-        print("'"+x+"'")
+for ZipCode in range(99999):
+    ZipCode=str(ZipCode).zfill(5)
+    if(zipcodes.is_real(ZipCode)):
+        ziplist.append(ZipCode)
+        FileName.writelines(ZipCode+"\n")
+        print("'"+ZipCode+"'")
 
 print("Ziplist Length",len(ziplist))
+FileName.close()
