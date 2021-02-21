@@ -2,7 +2,7 @@ from selenium import webdriver
 from os import path
 import os
 import re
-import requests
+# import requests
 import time
 import threading
 import random
@@ -44,7 +44,6 @@ def DownloadHTMLPage(WorkingURL,FileName,driverno):
         g.writelines(WorkingURL+"\n")
         g.close()
         
-
 def writedocprofiletotxt(HTMLFileName,BaseURL):
     f=open(HTMLFileName,"r")
     LineElements=list()
@@ -56,7 +55,6 @@ def writedocprofiletotxt(HTMLFileName,BaseURL):
             Elements.append(SplitElement)
     Elements=list(dict.fromkeys(Elements))
     f.close()
-    g=open("DoctorProfiles.txt","a+")
     for Members in Elements:
         if 'href="/doctor/' in Members:
             Members=Members.split('"')
@@ -64,9 +62,8 @@ def writedocprofiletotxt(HTMLFileName,BaseURL):
             if "?" in Members:
                 Members=Members.split("?")
                 Members=str(Members[0])
-            g.writelines(BaseURL+Members+"\n")
+            BufferList.append(BaseURL+Members)
 
-    g.close()
     os.remove(HTMLFileName)
 
 def removeduplicates():
@@ -80,6 +77,17 @@ def removeduplicates():
     f.writelines(lines)
     f.close()
 
+def MembersBuffer():
+    g=open("DoctorProfiles.txt","a+")
+    for x in BufferList:
+        g.writelines(x+"\n")
+        BufferList.remove(x)
+    g.close()
+    time.sleep(2)
+    removeduplicates()
+    MembersBuffer()
+
+BufferList=list()
 BaseURL="https://www.zocdoc.com/"
 CategorySuffix="search?dr_specialty=153&address="
 WorkingURL=BaseURL+CategorySuffix
@@ -89,12 +97,11 @@ driver1 = webdriver.Chrome()
 driver2 = webdriver.Chrome()
 driver3 = webdriver.Chrome()
 driver4 = webdriver.Chrome()
-driver5 = webdriver.Chrome()
+removeduplicates()
 
 zips=open("Zipcodes.txt","r")
 AreaList=zips.readlines()
-print(AreaList)
-print(len(AreaList))
+
 def threadripper(driverno):
     AreaCode1=random.choice(AreaList)
     DownloadHTMLPage(WorkingURL+AreaCode1[:-1],AreaCode1[:-1],driverno)
@@ -104,10 +111,10 @@ def threadripper(driverno):
         threadripper(driverno)
 
 t1=threading.Thread(target=threadripper,args=(driver1,))
-t2=threading.Thread(target=threadripper,args=(driver2))
-t3=threading.Thread(target=threadripper,args=(driver3))
-t4=threading.Thread(target=threadripper,args=(driver4))
-t5=threading.Thread(target=threadripper,args=(driver5))
+t2=threading.Thread(target=threadripper,args=(driver2,))
+t3=threading.Thread(target=threadripper,args=(driver3,))
+t4=threading.Thread(target=threadripper,args=(driver4,))
+t5=threading.Thread(target=MembersBuffer)
 t1.start()
 t2.start()
 t3.start()
@@ -118,7 +125,5 @@ t2.join()
 t3.join()
 t4.join()
 t5.join()
-
-removeduplicates()
 
 print("Finished Downloading HTML Pages")
