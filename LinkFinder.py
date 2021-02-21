@@ -22,7 +22,7 @@ def writedocprofiletotxt(HTMLFileName,BaseURL):
             g.writelines(BaseURL+Members+"\n")
 
     g.close()
-
+    os.remove(HTMLFileName)
 
 def removeduplicates():
     f=open("DoctorProfiles.txt","r")
