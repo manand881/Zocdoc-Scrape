@@ -27,7 +27,7 @@ def DownloadHTMLPage(WorkingURL,FileName,driverno):
     g=open("URLsVisited.txt","a+")
     HTMLFileName=FileName+".html"
     if(check_if_page_visited(WorkingURL)):
-        print(WorkingURL,"Already Visited")
+        print("Already Visited",WorkingURL)
     else:
         print("Opening Page",WorkingURL)
         try:
@@ -81,7 +81,7 @@ def members_buffer():
         g.writelines(x+"\n")
         BufferList.remove(x)
     g.close()
-    time.sleep(5)
+    time.sleep(60)
     remove_duplicates()
     members_buffer()
 
@@ -109,6 +109,8 @@ def threadripper(driverno):
     try:
         threadripper(driverno)
     except Exception as e:
+        if(len(AreaList)==0):
+            return None
         print("Error Occured",e)
         time.sleep(10)
         threadripper(driverno)
