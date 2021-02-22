@@ -19,9 +19,8 @@ def create_csv():
 def check_if_page_visited(WorkingURL):
     f=open("URLsVisited.txt","r+")
     VisitedURLList=f.readlines()
-    for x in VisitedURLList:
-        if WorkingURL in x:
-            return True
+    if WorkingURL in VisitedURLList:
+        return True
 
 def DownloadHTMLPage(WorkingURL,FileName,driverno):
     driver=driverno
@@ -30,7 +29,7 @@ def DownloadHTMLPage(WorkingURL,FileName,driverno):
     if(check_if_page_visited(WorkingURL)):
         sys.stdout.write("\nAlready Visited "+WorkingURL)
     else:
-        sys.stdout.write("\nOpening Page "+WorkingURL)
+        sys.stdout.write("\nOpening Page    "+WorkingURL)
         try:
             driver.get(WorkingURL)
         except:
@@ -70,7 +69,7 @@ def remove_duplicates():
     lines=f.readlines()
     sys.stdout.write("\nNo of Entries Before Removing Duplicates "+str(len(lines)))
     lines=list(dict.fromkeys(lines))
-    sys.stdout.write("\nNo of Entries After Removing Duplicates "+str(len(lines)))
+    sys.stdout.write("\nNo of Entries After  Removing Duplicates "+str(len(lines)))
     f.close()
     f=open("DoctorProfiles.txt","w")
     f.writelines(lines)
@@ -98,10 +97,20 @@ driver3 = webdriver.Chrome()
 driver4 = webdriver.Chrome()
 driver5 = webdriver.Chrome()
 
-remove_duplicates()
-
 zips=open("Zipcodes.txt","r")
 AreaList=zips.readlines()
+
+def remove_visited_before_start():
+    f=open("URLsVisited.txt","r+")
+    VisitedURLList=f.readlines()
+    print("Total number of searchable zipcodes in the US:",len(AreaList))
+    print("Total number of URLs Already Visited:         ",len(VisitedURLList))
+    for x in AreaList:
+        if WorkingURL+x in (VisitedURLList):
+            AreaList.remove(x)
+    print("Total number of remaining zipcodes to search: ",len(AreaList))
+
+remove_visited_before_start()
 
 def threadripper(driverno):
     AreaCode1=random.choice(AreaList)
@@ -112,7 +121,7 @@ def threadripper(driverno):
     except Exception as e:
         if(len(AreaList)==0):
             return None
-        sys.stdout.write("\nError Occured "+e)
+        sys.stdout.write("\nError Occured "+str(e))
         time.sleep(10)
         threadripper(driverno)
 
