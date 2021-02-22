@@ -5,6 +5,7 @@ import re
 import time
 import threading
 import random
+import sys
 
 def create_csv():
     if(path.exists("ProfileData.csv")):
@@ -27,9 +28,9 @@ def DownloadHTMLPage(WorkingURL,FileName,driverno):
     g=open("URLsVisited.txt","a+")
     HTMLFileName=FileName+".html"
     if(check_if_page_visited(WorkingURL)):
-        print("Already Visited",WorkingURL)
+        sys.stdout.write("\nAlready Visited "+WorkingURL)
     else:
-        print("Opening Page",WorkingURL)
+        sys.stdout.write("\nOpening Page "+WorkingURL)
         try:
             driver.get(WorkingURL)
         except:
@@ -67,9 +68,9 @@ def write_docprofile_to_txt(HTMLFileName,BaseURL):
 def remove_duplicates():
     f=open("DoctorProfiles.txt","r")
     lines=f.readlines()
-    print("No of Entries Before Removing Duplicates",len(lines))
+    sys.stdout.write("\nNo of Entries Before Removing Duplicates"+len(lines))
     lines=list(dict.fromkeys(lines))
-    print("No of Entries After Removing Duplicates",len(lines))
+    sys.stdout.write("\nNo of Entries After Removing Duplicates"+len(lines))
     f.close()
     f=open("DoctorProfiles.txt","w")
     f.writelines(lines)
@@ -111,7 +112,7 @@ def threadripper(driverno):
     except Exception as e:
         if(len(AreaList)==0):
             return None
-        print("Error Occured",e)
+        sys.stdout.write("\nError Occured "+e)
         time.sleep(10)
         threadripper(driverno)
 
