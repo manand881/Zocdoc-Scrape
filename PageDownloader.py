@@ -68,9 +68,9 @@ def write_docprofile_to_txt(HTMLFileName,BaseURL):
 def remove_duplicates():
     f=open("DoctorProfiles.txt","r")
     lines=f.readlines()
-    sys.stdout.write("\nNo of Entries Before Removing Duplicates"+len(lines))
+    sys.stdout.write("\nNo of Entries Before Removing Duplicates "+str(len(lines)))
     lines=list(dict.fromkeys(lines))
-    sys.stdout.write("\nNo of Entries After Removing Duplicates"+len(lines))
+    sys.stdout.write("\nNo of Entries After Removing Duplicates "+str(len(lines)))
     f.close()
     f=open("DoctorProfiles.txt","w")
     f.writelines(lines)
