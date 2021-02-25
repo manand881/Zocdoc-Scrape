@@ -24,7 +24,6 @@ def DownloadHTMLPage(WorkingURL,driverno):
     try:
         driver.get(WorkingURL)
     except:
-        g.close()
         time.sleep(10)
         DownloadHTMLPage(WorkingURL,driverno)
     write_docprofile_to_txt(BaseURL[:-1],driver.page_source) 
@@ -53,6 +52,7 @@ def remove_duplicates():
     lines=f.readlines()
     sys.stdout.write("\nNo of Entries Before Removing Duplicates "+str(len(lines)))
     lines=list(dict.fromkeys(lines))
+    lines.sort()
     sys.stdout.write("\nNo of Entries After  Removing Duplicates "+str(len(lines)))
     f.close()
     f=open("DoctorProfiles.txt","w")
@@ -101,7 +101,7 @@ def remove_visited_before_start(AreaList):
 AreaList=list(remove_visited_before_start(AreaList))
 
 def threadripper(driverno,stackoverflow):
-    if stackoverflow<500:
+    if stackoverflow<800:
         stackoverflow+=1
         AreaCode1=random.choice(AreaList)
         DownloadHTMLPage(WorkingURL+AreaCode1,driverno)
@@ -131,6 +131,15 @@ t6=threading.Thread(target=members_buffer)
 
 for stack in range(99):
     stackoverflow=0
+    try:
+        t1.join()
+        t2.join()
+        t3.join()
+        t4.join()
+        t5.join()
+        t6.join()
+    except:
+        pass
     t1.start()
     t2.start()
     t3.start()
