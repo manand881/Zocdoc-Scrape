@@ -1,5 +1,6 @@
 from selenium import webdriver
 from os import path
+import numpy as np
 import os
 import re
 import time
@@ -16,43 +17,28 @@ def create_csv():
         f.writelines("Name,NPINumber,Gender,Specialities,Practice Name,Hospital affiliations,BoardCertifications,Education Training,Awards Publications,Languages,Location,About\n")
         f.close()
 
-def check_if_page_visited(WorkingURL):
-    f=open("URLsVisited.txt","r+")
-    VisitedURLList=f.readlines()
-    if WorkingURL in VisitedURLList:
-        return True
-
-def DownloadHTMLPage(WorkingURL,FileName,driverno):
+def DownloadHTMLPage(WorkingURL,driverno):
     driver=driverno
     g=open("URLsVisited.txt","a+")
-    HTMLFileName=FileName+".html"
-    if(check_if_page_visited(WorkingURL)):
-        sys.stdout.write("\nAlready Visited "+WorkingURL)
-    else:
-        sys.stdout.write("\nOpening Page    "+WorkingURL)
-        try:
-            driver.get(WorkingURL)
-        except:
-            g.close()
-            time.sleep(10)
-            DownloadHTMLPage(WorkingURL,FileName,driverno)
-        f=open(HTMLFileName,'w+')
-        f.writelines(driver.page_source)
-        f.close()
-        write_docprofile_to_txt(HTMLFileName,BaseURL[:-1]) 
-        g.writelines(WorkingURL+"\n")
+    sys.stdout.write("\nOpening Page    "+WorkingURL)
+    try:
+        driver.get(WorkingURL)
+    except:
         g.close()
+        time.sleep(10)
+        DownloadHTMLPage(WorkingURL,driverno)
+    write_docprofile_to_txt(BaseURL[:-1],driver.page_source) 
+    g.writelines(WorkingURL+"\n")
+    g.close()       
         
-def write_docprofile_to_txt(HTMLFileName,BaseURL):
-    f=open(HTMLFileName,"r")
+def write_docprofile_to_txt(BaseURL,page_source):
     Elements=list()
-    HTMLFile=f.readlines()
+    HTMLFile=page_source.split("\n")
     for Line in HTMLFile:
         LineElements=Line.split(" ")
         for SplitElement in LineElements:
             Elements.append(SplitElement)
     Elements=list(dict.fromkeys(Elements))
-    f.close()
     for Members in Elements:
         if 'href="/doctor/' in Members:
             Members=Members.split('"')
@@ -61,8 +47,6 @@ def write_docprofile_to_txt(HTMLFileName,BaseURL):
                 Members=Members.split("?")
                 Members=str(Members[0])
             BufferList.append(BaseURL+Members)
-
-    os.remove(HTMLFileName)
 
 def remove_duplicates():
     f=open("DoctorProfiles.txt","r")
@@ -83,7 +67,8 @@ def members_buffer():
     g.close()
     time.sleep(60)
     remove_duplicates()
-    members_buffer()
+    if t1.is_alive() or t2.is_alive() or t3.is_alive() or t4.is_alive() or t5.is_alive():
+        members_buffer()
 
 BufferList=list()
 BaseURL="https://www.zocdoc.com/"
@@ -91,57 +76,72 @@ CategorySuffix="search?dr_specialty=153&address="
 WorkingURL=BaseURL+CategorySuffix
 
 create_csv()
+
+zips=open("Zipcodes.txt","r")
+AreaList=zips.read()
+AreaList=AreaList.split("\n")
+
+def remove_visited_before_start(AreaList):
+    f=open("URLsVisited.txt","r+")
+    VisitedURLList=f.read()
+    VisitedURLList=VisitedURLList.split("\n")
+    VisitedZipList=list()
+    TempList=list()
+    print("Total number of searchable zipcodes in the US:",len(AreaList))
+    print("Total number of URLs Already Visited:         ",len(VisitedURLList))
+    for x in (VisitedURLList):
+        VisitedZipList.append(x[-5:])
+    VisitedZipList.sort()
+    TempList=np.setdiff1d(AreaList, VisitedZipList)
+    AreaList.clear()
+    AreaList=TempList
+    print("Total number of remaining zipcodes to search: ",len(AreaList))
+    return AreaList
+
+AreaList=list(remove_visited_before_start(AreaList))
+
+def threadripper(driverno,stackoverflow):
+    if stackoverflow<500:
+        stackoverflow+=1
+        AreaCode1=random.choice(AreaList)
+        DownloadHTMLPage(WorkingURL+AreaCode1,driverno)
+        AreaList.remove(AreaCode1)
+        try:
+            threadripper(driverno,stackoverflow)
+        except Exception as e:
+            if(len(AreaList)==0):
+                return None
+            sys.stdout.write("\nError Occured "+str(e))
+
+os.system('taskkill /IM "chromedriver.exe" /F')
+os.system('taskkill /IM "chrome.exe" /F')
 driver1 = webdriver.Chrome()
 driver2 = webdriver.Chrome()
 driver3 = webdriver.Chrome()
 driver4 = webdriver.Chrome()
 driver5 = webdriver.Chrome()
 
-zips=open("Zipcodes.txt","r")
-AreaList=zips.readlines()
-
-def remove_visited_before_start():
-    f=open("URLsVisited.txt","r+")
-    VisitedURLList=f.readlines()
-    print("Total number of searchable zipcodes in the US:",len(AreaList))
-    print("Total number of URLs Already Visited:         ",len(VisitedURLList))
-    for x in AreaList:
-        if WorkingURL+x in (VisitedURLList):
-            AreaList.remove(x)
-    print("Total number of remaining zipcodes to search: ",len(AreaList))
-
-remove_visited_before_start()
-
-def threadripper(driverno):
-    AreaCode1=random.choice(AreaList)
-    DownloadHTMLPage(WorkingURL+AreaCode1[:-1],AreaCode1[:-1],driverno)
-    AreaList.remove(AreaCode1)
-    try:
-        threadripper(driverno)
-    except Exception as e:
-        if(len(AreaList)==0):
-            return None
-        sys.stdout.write("\nError Occured "+str(e))
-        time.sleep(10)
-        threadripper(driverno)
-
-t1=threading.Thread(target=threadripper,args=(driver1,))
-t2=threading.Thread(target=threadripper,args=(driver2,))
-t3=threading.Thread(target=threadripper,args=(driver3,))
-t4=threading.Thread(target=threadripper,args=(driver4,))
-t5=threading.Thread(target=threadripper,args=(driver5,))
+stackoverflow=0
+t1=threading.Thread(target=threadripper,args=(driver1,stackoverflow,))
+t2=threading.Thread(target=threadripper,args=(driver2,stackoverflow,))
+t3=threading.Thread(target=threadripper,args=(driver3,stackoverflow,))
+t4=threading.Thread(target=threadripper,args=(driver4,stackoverflow,))
+t5=threading.Thread(target=threadripper,args=(driver5,stackoverflow,))
 t6=threading.Thread(target=members_buffer)
-t1.start()
-t2.start()
-t3.start()
-t4.start()
-t5.start()
-t6.start()
-t1.join()
-t2.join()
-t3.join()
-t4.join()
-t5.join()
-t6.join()
+
+for stack in range(99):
+    stackoverflow=0
+    t1.start()
+    t2.start()
+    t3.start()
+    t4.start()
+    t5.start()
+    t6.start()
+    t1.join()
+    t2.join()
+    t3.join()
+    t4.join()
+    t5.join()
+    t6.join()
 
 print("Finished Downloading HTML Pages")

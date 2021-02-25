@@ -3,8 +3,9 @@ import time
 import os
 from os import path
 
+driver = webdriver.Chrome()
 def ScrapeInfo(DoctorProfileURL):
-    driver = webdriver.Chrome()
+    
     driver.get(DoctorProfileURL)
     try:
         Name=driver.find_element_by_xpath("/html/body/div/div/main/div/div/section/div/div/h1/span").text
@@ -76,8 +77,6 @@ def ScrapeInfo(DoctorProfileURL):
     except:
         Location="Nan"
 
-    driver.close()
-
     return Name,NPINumber,Gender,Specialities,PracticeName,Hospital_affiliations,BoardCertifications,EducationTraining,AwardsPublications,Languages,Location,About
 
 
@@ -94,7 +93,20 @@ def WriteScrapedInfoToCSV(DoctorProfileURL):
     f.close()
     time.sleep(1)
 
-f=open("DoctorProfiles.txt","r")
-lines=f.readlines()
-for x in lines:
-    WriteScrapedInfoToCSV(x)
+def remove_duplicates():
+    f=open("ProfileData.csv","r+")
+    entries=f.readlines()
+    entries=list(dict.fromkeys(entries))
+    entries.sort()
+    f.close()
+    f=open("ProfileData.csv","w")
+    for entry in entries:
+        f.writelines(entry)
+
+remove_duplicates()
+# f=open("DoctorProfiles.txt","r")
+# lines=f.readlines()
+# for x in lines:
+#     WriteScrapedInfoToCSV(x)
+
+# driver.close()

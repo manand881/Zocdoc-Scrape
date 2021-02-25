@@ -2,7 +2,7 @@ import zipcodes
 import os
 
 ziplist=list()
-FileName=open("Zipcodes.txt","w+") 
+FileName=open("Zipcodes.txt","a+") 
 
 for ZipCode in range(99999):
     ZipCode=str(ZipCode).zfill(5)
